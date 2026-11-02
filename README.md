@@ -1,3 +1,1 @@
-# elliotchen.co
-
-My personal web portfolio, click [here](https://elliotchen.co/) to visit.
+My personal web portfolio, click [here](https://elliotchen.co) to visit.
