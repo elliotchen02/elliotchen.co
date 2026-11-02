@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://elliotchen02.github.io',
+  site: 'https://elliotchen.co',
   base: '/',
   integrations: [mdx(), sitemap()],
 });

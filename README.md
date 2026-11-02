@@ -1,3 +1,3 @@
-# elliotchen02.github.io
+# elliotchen.co
 
-My personal web portfolio, click [here](https://elliotchen02.github.io/) to visit.
+My personal web portfolio, click [here](https://elliotchen.co/) to visit.
