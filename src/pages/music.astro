@@ -1,0 +1,523 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// Add your own connection to each album in `thoughts`. Blank notes stay hidden.
+// The hand-picked RGB tones echo the artwork without affecting text contrast.
+const albums = [
+  {
+    title: 'In Between Dreams', artist: 'Jack Johnson', spotifyId: '7tTc46dNdE6GGuiQsssWxo',
+    cover: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d0000b27306b42768ebe736eec21336ea',
+    tone: '207, 163, 45',
+    thoughts: 'I spent four months on the Big Island in Hawaii, living and working on a sustainable farm. Every morning, the workers would play Jack Johnson. Listening to this album brings me back to those days, lying under banana palms and looking out at the endless ocean.',
+  },
+  {
+    title: 'The Universe Smiles Upon You', artist: 'Khruangbin', spotifyId: '2OPcQNLP8DQVumD8kBRAH3',
+    cover: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d0000b273bc009dcb7578608697771b74',
+    tone: '70, 148, 153',
+    thoughts: 'After my stint in Hawaii, I travelled for a few months through Thailand, starting in Chang Mai and working my way down south. It was an adventure to say the least — I almost lost my arm in a mountain biking accident my second week. Between the hospital visits, I found myself lying on the many beautiful beaches in southern Thailand. Khruangbin embodied the vibe.',
+  },
+  {
+    title: 'The Marshall Mathers LP', artist: 'Eminem', spotifyId: '6t7956yu5zYf5A829XRiHC',
+    cover: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d0000b273dbb3dd82da45b7d7f31b1b42',
+    tone: '137, 135, 117',
+    thoughts: 'I’ve probably listened to this album a thousand times. I swam competitively in high school and college, and Eminem was my hype man.',
+  },
+  {
+    title: 'Cage the Elephant', artist: 'Cage the Elephant', spotifyId: '0KcRX7YkMZ4mwOkEiCb9zw',
+    cover: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d0000b27304a4f82bf0594b411397edde',
+    tone: '161, 93, 117',
+    thoughts: 'This is just a badass album.',
+  },
+  {
+    title: 'Mothership', artist: 'Led Zeppelin', spotifyId: '4wExFfncaUIqSgoxnqa3Eh',
+    cover: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d0000b27322f1b6c28ce5735646b2e569',
+    tone: '180, 55, 47',
+    thoughts: 'Another badass album.',
+  },
+  {
+    title: 'Californication', artist: 'Red Hot Chili Peppers', spotifyId: '0fLhefnjlIV3pGNF9Wo8CD',
+    cover: 'https://image-cdn-ak.spotifycdn.com/image/ab67616d0000b273a9249ebb15ca7a5b75f16a90',
+    tone: '201, 86, 57',
+    thoughts: 'I’d actually never listened to this album start to finish until I was driving across the country from Chicago to the Bay after graduating college. California! What lies in store?',
+  },
+  {
+    title: 'Rumours', artist: 'Fleetwood Mac', spotifyId: '1bt6q2SruMsBtcerNVtpZB',
+    cover: 'https://image-cdn-fa.spotifycdn.com/image/ab67616d0000b27357df7ce0eac715cf70e519a7',
+    tone: '173, 150, 112', thoughts: '',
+  },
+];
+---
+
+<BaseLayout title="Music" description="A collection of favorite albums.">
+  <section class="music">
+    <h1>Music</h1>
+    <p class="page-intro">I’ve been playing piano since I was little, and music has been a big part of my life. Some good memories are tied to these albums.</p>
+    <div class="album-grid">
+      {albums.map((album) => (
+        <button
+          class="album-card"
+          type="button"
+          aria-haspopup="dialog"
+          aria-controls="album-dialog"
+          aria-label={`Explore ${album.title} by ${album.artist}`}
+          style={`--album-tone: ${album.tone}`}
+          data-title={album.title}
+          data-artist={album.artist}
+          data-album-id={album.spotifyId}
+          data-thoughts={album.thoughts}
+          data-tone={album.tone}
+        >
+          <span class="album-art"><img src={album.cover} alt="" width="300" height="300" loading="lazy" decoding="async" /></span>
+          <span class="card-title">{album.title}</span>
+          <span class="card-artist">{album.artist}</span>
+        </button>
+      ))}
+    </div>
+  </section>
+
+  <dialog class="album-dialog" id="album-dialog" aria-labelledby="album-title">
+    <div class="dialog-inner">
+      <button class="close-dialog" type="button" aria-label="Close album details" autofocus>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" /></svg>
+      </button>
+      <div class="dialog-details">
+        <header class="dialog-heading">
+          <h2 id="album-title">{albums[0].title}</h2>
+          <p class="dialog-artist">{albums[0].artist}</p>
+        </header>
+        <p class="album-thoughts" hidden></p>
+      </div>
+      <div class="player-section">
+        <div class="player-frame">
+          <div class="player-loading" role="status" hidden><span class="loading-mark" aria-hidden="true"></span><span class="visually-hidden">Loading player</span></div>
+          <div class="spotify-player" id="spotify-player" aria-label="Spotify album player"></div>
+        </div>
+        <p class="player-error" role="status" hidden>Player unavailable. <a class="error-link" href="https://open.spotify.com/" target="_blank" rel="noopener noreferrer">Listen on Spotify ↗</a></p>
+      </div>
+    </div>
+  </dialog>
+</BaseLayout>
+
+<script>
+  type SpotifyController = {
+    play: () => void;
+    destroy: () => void;
+    addListener: (event: 'ready', callback: () => void) => void;
+  };
+  type SpotifyApi = {
+    createController: (element: HTMLElement, options: { url: string; width: string; height: number }, callback: (controller: SpotifyController) => void) => void;
+  };
+  type AlbumSession = { id: string; title: string; session: number };
+  const PLAYER_HEIGHT = 432;
+
+  const spotifyWindow = window as Window & { onSpotifyIframeApiReady?: (api: SpotifyApi) => void };
+  const dialog = document.querySelector<HTMLDialogElement>('.album-dialog');
+  const closeButton = document.querySelector<HTMLButtonElement>('.close-dialog');
+  const title = document.querySelector<HTMLElement>('#album-title');
+  const artist = document.querySelector<HTMLElement>('.dialog-artist');
+  const thoughts = document.querySelector<HTMLElement>('.album-thoughts');
+  const player = document.querySelector<HTMLElement>('#spotify-player');
+  const loading = document.querySelector<HTMLElement>('.player-loading');
+  const playerError = document.querySelector<HTMLElement>('.player-error');
+  const errorLink = document.querySelector<HTMLAnchorElement>('.error-link');
+  let api: SpotifyApi | undefined;
+  let controller: SpotifyController | undefined;
+  let session = 0;
+  let playerAttempt = 0;
+  let fallbackTimer: ReturnType<typeof setTimeout> | undefined;
+  let readyTimer: ReturnType<typeof setTimeout> | undefined;
+  let pendingAlbum: AlbumSession | undefined;
+  let opener: HTMLButtonElement | undefined;
+  let apiFailed = false;
+
+  function finishLoading() {
+    clearTimeout(readyTimer);
+    if (loading) loading.hidden = true;
+    player?.setAttribute('aria-busy', 'false');
+  }
+
+  function showPlayerError(album: AlbumSession) {
+    if (!dialog?.open || album.session !== session) return;
+    finishLoading();
+    if (playerError) playerError.hidden = false;
+  }
+
+  function fallbackPlayer(album: AlbumSession) {
+    if (!player || !dialog?.open || album.session !== session) return;
+    const attempt = ++playerAttempt;
+    clearTimeout(fallbackTimer);
+    clearTimeout(readyTimer);
+    pendingAlbum = undefined;
+    const frame = document.createElement('iframe');
+    frame.src = `https://open.spotify.com/embed/album/${encodeURIComponent(album.id)}?theme=0`;
+    frame.title = `Spotify player for ${album.title}`;
+    frame.width = '100%';
+    frame.height = String(PLAYER_HEIGHT);
+    frame.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+    frame.addEventListener('load', () => {
+      if (dialog.open && album.session === session && attempt === playerAttempt) finishLoading();
+    }, { once: true });
+    frame.addEventListener('error', () => showPlayerError(album), { once: true });
+    player.replaceChildren(frame);
+    readyTimer = setTimeout(() => showPlayerError(album), 12000);
+  }
+
+  function startPlayer(album: AlbumSession) {
+    if (!api || !player || !dialog?.open || album.session !== session) return;
+    const attempt = ++playerAttempt;
+    clearTimeout(fallbackTimer);
+    pendingAlbum = undefined;
+    const mount = document.createElement('div');
+    player.replaceChildren(mount);
+    readyTimer = setTimeout(() => {
+      controller?.destroy();
+      controller = undefined;
+      fallbackPlayer(album);
+    }, 10000);
+    try {
+      api.createController(mount, { url: `https://open.spotify.com/album/${album.id}?theme=0`, width: '100%', height: PLAYER_HEIGHT }, (created) => {
+        if (!dialog.open || album.session !== session || attempt !== playerAttempt) {
+          created.destroy();
+          return;
+        }
+        controller = created;
+        const frame = player.querySelector('iframe');
+        if (frame) frame.title = `Spotify player for ${album.title}`;
+        created.addListener('ready', () => {
+          if (!dialog.open || album.session !== session || attempt !== playerAttempt) return;
+          finishLoading();
+          created.play();
+        });
+      });
+    } catch {
+      fallbackPlayer(album);
+    }
+  }
+
+  spotifyWindow.onSpotifyIframeApiReady = (loadedApi) => {
+    api = loadedApi;
+    if (pendingAlbum) startPlayer(pendingAlbum);
+  };
+  const apiScript = document.createElement('script');
+  apiScript.src = 'https://open.spotify.com/embed/iframe-api/v1';
+  apiScript.async = true;
+  apiScript.addEventListener('error', () => {
+    apiFailed = true;
+    if (pendingAlbum) fallbackPlayer(pendingAlbum);
+  });
+  document.body.appendChild(apiScript);
+
+  document.querySelectorAll<HTMLButtonElement>('.album-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      const { albumId, title: albumTitle, artist: albumArtist, thoughts: note, tone } = card.dataset;
+      if (!dialog || !player || !albumId || !albumTitle) return;
+      opener = card;
+      if (title) title.textContent = albumTitle;
+      if (artist) artist.textContent = albumArtist ?? '';
+      if (thoughts) {
+        thoughts.textContent = note ?? '';
+        thoughts.hidden = !note?.trim();
+      }
+      dialog.style.setProperty('--album-tone', tone ?? '173, 150, 112');
+      const spotifyUrl = `https://open.spotify.com/album/${encodeURIComponent(albumId)}`;
+      if (errorLink) errorLink.href = spotifyUrl;
+      if (loading) loading.hidden = false;
+      if (playerError) playerError.hidden = true;
+      player.setAttribute('aria-busy', 'true');
+      dialog.scrollTop = 0;
+      dialog.showModal();
+      const album = { id: albumId, title: albumTitle, session: ++session };
+      if (api) startPlayer(album);
+      else if (apiFailed) fallbackPlayer(album);
+      else {
+        pendingAlbum = album;
+        fallbackTimer = setTimeout(() => fallbackPlayer(album), 3000);
+      }
+    });
+  });
+
+  closeButton?.addEventListener('click', () => dialog?.close());
+  // Require both ends of a click outside, so dragging out of the popup won't close it.
+  let backdropPointerDown = false;
+  dialog?.addEventListener('pointerdown', (event) => {
+    backdropPointerDown = event.target === dialog;
+  });
+  dialog?.addEventListener('click', (event) => {
+    if (event.target === dialog && backdropPointerDown) dialog.close();
+    backdropPointerDown = false;
+  });
+  dialog?.addEventListener('close', () => {
+    session++;
+    playerAttempt++;
+    clearTimeout(fallbackTimer);
+    clearTimeout(readyTimer);
+    pendingAlbum = undefined;
+    controller?.destroy();
+    controller = undefined;
+    player?.replaceChildren();
+    finishLoading();
+    opener?.focus({ preventScroll: true });
+  });
+</script>
+
+<style>
+  .music {
+    max-width: 760px;
+  }
+
+  .page-intro {
+    max-width: var(--reading-width);
+    margin-top: 1rem;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+
+  .album-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2.25rem 1.5rem;
+    margin-top: 2.5rem;
+  }
+
+  .album-card {
+    min-width: 0;
+    border: 0;
+    border-radius: 4px;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .album-art {
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 1;
+    border-radius: 4px;
+    background: var(--surface-2);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+    transition: transform 220ms ease, box-shadow 220ms ease;
+  }
+
+  .album-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .album-card:focus-visible .album-art {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 28px rgba(var(--album-tone), 0.2);
+  }
+
+  @media (hover: hover) {
+    .album-card:hover .album-art {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 28px rgba(var(--album-tone), 0.2);
+    }
+  }
+
+  .card-title,
+  .card-artist {
+    display: block;
+    overflow-wrap: anywhere;
+  }
+
+  .card-title {
+    margin-top: 0.9rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .card-artist {
+    margin-top: 0.2rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  :global(html:has(.music)) {
+    scrollbar-gutter: stable;
+  }
+
+  :global(body:has(.album-dialog[open])) {
+    overflow: hidden;
+  }
+
+  .album-dialog {
+    --album-tone: 173, 150, 112;
+    --player-height: 432px;
+    position: fixed;
+    width: min(calc(100% - 3rem), 880px);
+    max-height: 90vh;
+    max-height: 90dvh;
+    margin: auto;
+    padding: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    border: 1px solid rgba(var(--album-tone), 0.3);
+    border-radius: 16px;
+    background: radial-gradient(ellipse at 0% 0%, rgba(var(--album-tone), 0.3), transparent 80%), #17191b;
+    color: #f4f1eb;
+    box-shadow: 0 32px 100px rgba(0, 0, 0, 0.55), 0 0 100px rgba(var(--album-tone), 0.1);
+    color-scheme: dark;
+  }
+
+  .album-dialog::backdrop {
+    background: radial-gradient(ellipse at 40% 45%, rgba(var(--album-tone), 0.25), transparent 75%), rgba(6, 8, 10, 0.8);
+    backdrop-filter: blur(10px);
+  }
+
+  .album-dialog[open] {
+    animation: album-reveal 240ms ease-out both;
+  }
+
+  .dialog-inner {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    grid-template-areas: 'player details';
+    gap: 2rem;
+    padding: 3rem 2.5rem 2.5rem;
+  }
+
+  .close-dialog {
+    position: absolute;
+    z-index: 1;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #d9d5ce;
+    cursor: pointer;
+    transition: background 150ms ease;
+  }
+
+  .close-dialog:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .dialog-details {
+    grid-area: details;
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+  }
+
+  .dialog-heading h2 {
+    color: inherit;
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
+    line-height: 1.15;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+  }
+
+  .dialog-artist {
+    margin-top: 0.6rem;
+    color: #c5c2bc;
+    font-size: 1.05rem;
+  }
+
+  .album-thoughts {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #dedad4;
+    line-height: 1.75;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+
+  .player-section {
+    grid-area: player;
+    min-width: 0;
+  }
+
+  .player-frame {
+    position: relative;
+    min-height: calc(var(--player-height) + 18px);
+    padding: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    background: rgba(10, 12, 14, 0.35);
+  }
+
+  .spotify-player {
+    position: relative;
+    min-height: var(--player-height);
+  }
+
+  .spotify-player :global(iframe) {
+    display: block;
+    width: 100%;
+    height: var(--player-height);
+    border: 0;
+    border-radius: 8px;
+  }
+
+  .player-loading:not([hidden]) {
+    position: absolute;
+    inset: 8px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.025);
+    pointer-events: none;
+  }
+
+  .loading-mark {
+    width: 22px;
+    height: 22px;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-top-color: #dedad4;
+    border-radius: 50%;
+    animation: player-loading 800ms linear infinite;
+  }
+
+  .error-link {
+    color: #f4f1eb;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+
+  .player-error {
+    margin-top: 0.75rem;
+    color: #c5c2bc;
+    font-size: 0.9rem;
+  }
+
+  @keyframes album-reveal {
+    from { opacity: 0; transform: translateY(10px) scale(0.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes player-loading {
+    to { transform: rotate(360deg); }
+  }
+
+  @media (max-width: 760px) {
+    .album-dialog { width: min(calc(100% - 2rem), 480px); }
+    .dialog-inner { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'details' 'player'; gap: 1.75rem; padding: 3rem 1.5rem 1rem; }
+    .dialog-heading h2 { font-size: 1.7rem; }
+  }
+
+  @media (max-width: 520px) {
+    .album-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.75rem 1rem; }
+  }
+
+  @media (max-width: 380px) {
+    .dialog-inner { padding-inline: 1rem; }
+    .player-frame { padding: 0; min-height: calc(var(--player-height) + 2px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .album-art, .close-dialog { transition: none; }
+    .album-dialog[open], .loading-mark { animation: none; }
+  }
+</style>

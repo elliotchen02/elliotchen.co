@@ -1,16 +1,14 @@
 ---
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
+import Sidebar from '../components/Sidebar.astro';
 import { SITE } from '../consts';
 import '../styles/global.css';
 
 interface Props {
   title?: string;
   description?: string;
-  showHeader?: boolean;
 }
 
-const { title, description = SITE.tagline, showHeader = true } = Astro.props;
+const { title, description = 'Elliot Chen’s personal website.' } = Astro.props;
 const pageTitle = title ? `${title} - ${SITE.name}` : SITE.title;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 ---
@@ -20,7 +18,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/jpeg" href="/assets/pics/headshot.jpeg" />
+    <meta name="theme-color" content="#101216" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonical} />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
@@ -29,21 +28,21 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
     <meta name="twitter:card" content="summary" />
-    <link rel="preconnect" href="https://rsms.me/" />
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&display=swap"
     />
     <link rel="sitemap" href="/sitemap-index.xml" />
   </head>
   <body>
-    {showHeader && <Header />}
-    <main>
-      <slot />
-    </main>
-    <Footer />
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="site-shell">
+      <Sidebar />
+      <main id="main-content">
+        <slot />
+      </main>
+    </div>
   </body>
 </html>

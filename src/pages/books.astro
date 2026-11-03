@@ -1,0 +1,131 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const books = [
+  {
+    title: 'Sandkings',
+    author: 'George R. R. Martin',
+    cover: 'https://upload.wikimedia.org/wikipedia/en/c/c3/SandkingsCover.jpg',
+    coverAlt: 'Ebook cover of Sandkings by George R. R. Martin',
+    thoughts: 'The depths of human cruelty presented in a bite-sized novella that you can read over lunch. What good sci-fi should be.',
+  },
+  {
+    title: 'A Confession',
+    author: 'Leo Tolstoy',
+    cover: 'https://covers.openlibrary.org/b/id/104027-M.jpg?default=false',
+    coverAlt: 'Cover of A Confession and Other Religious Writings by Leo Tolstoy',
+    thoughts: 'Depressed and struggling to find meaning in his life, Tolstoy rationalizes the irrational — faith. A reminder to myself of what’s truly important.',
+  },
+  {
+    title: 'Demon Copperhead',
+    author: 'Barbara Kingsolver',
+    cover: 'https://covers.openlibrary.org/b/id/13141227-M.jpg?default=false',
+    coverAlt: 'Cover of Demon Copperhead by Barbara Kingsolver',
+    thoughts: '“This is what we’re meant to say: Look at their choices, leading to a life of ruin. But lives are getting lived right now, this hour, down in the dirty cracks between the toothbrushed nighty-nights and the full grocery carts, where those words don’t pertain.”',
+  },
+  {
+    title: 'Ishmael',
+    author: 'Daniel Quinn',
+    cover: 'https://covers.openlibrary.org/b/id/369672-M.jpg?default=false',
+    coverAlt: 'Cover of Ishmael by Daniel Quinn',
+    thoughts: 'A talking gorilla gives a socratic seminar about the environmental destruction of the world. While I don’t agree with every argument Quinn presents, I do think we probably agree on the answer to the question: “With gorilla gone, will there be hope for man?”',
+  },
+  {
+    title: 'A Promised Land',
+    author: 'Barack Obama',
+    cover: 'https://covers.openlibrary.org/b/id/10449357-M.jpg?default=false',
+    coverAlt: 'Cover of A Promised Land by Barack Obama',
+    thoughts: 'I found Obama’s perspective on his first presidential term to be incredibly sobering in our current political landscape marred by tribalism.',
+  },
+  {
+    title: 'All the Light We Cannot See',
+    author: 'Anthony Doerr',
+    cover: 'https://covers.openlibrary.org/b/id/14559680-M.jpg?default=false',
+    coverAlt: 'Cover of All the Light We Cannot See by Anthony Doerr',
+    thoughts: 'Simply a beautiful story. I read this back in high school, but I will never forget the bittersweet ending.',
+  },
+];
+---
+
+<BaseLayout title="Books" description="Books Elliot Chen has been reading.">
+  <section class="books">
+    <h1>Books</h1>
+    <p class="page-intro">A collection of favorites that have stuck with me.</p>
+    <div class="book-list">
+      {books.map((book) => (
+        <article class="book">
+          <img class="book-cover" src={book.cover} alt={book.coverAlt} width="120" height="180" loading="lazy" />
+          <div class="book-details">
+            <h2>{book.title}</h2>
+            <p class="book-byline">{book.author}</p>
+            <p class="book-thoughts">{book.thoughts}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .books {
+    max-width: var(--reading-width);
+  }
+
+  .page-intro {
+    margin-top: 0.75rem;
+    color: var(--text-muted);
+    font-size: 1rem;
+  }
+
+  .book-list {
+    margin-top: 2.75rem;
+  }
+
+  .book {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 1.75rem;
+    align-items: start;
+  }
+
+  .book + .book {
+    margin-top: 2.75rem;
+    padding-top: 0;
+    border: 0;
+  }
+
+  .book-cover {
+    width: 120px;
+    height: auto;
+    border-radius: 2px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  }
+
+  .book-details h2 {
+    font-size: 1.125rem;
+  }
+
+  .book-byline {
+    margin-top: 0.3rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .book-thoughts {
+    margin-top: 1rem;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 420px) {
+    .book {
+      grid-template-columns: 88px minmax(0, 1fr);
+      gap: 1.15rem;
+    }
+
+    .book-cover {
+      width: 88px;
+    }
+  }
+</style>
